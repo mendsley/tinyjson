@@ -151,6 +151,7 @@ int myjson_parse( const char* json, int length, struct myjson_token *out, int ma
 
 		case op_unbare:
 			CAP(-1);
+			--cur;
 			st = &st_struct;
 			break;
 
