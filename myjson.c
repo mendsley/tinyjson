@@ -102,7 +102,7 @@ int myjson_parse( const char* json, int length, struct myjson_token *out, int ma
 		switch (opcode)
 		{
 		case op_bad:
-			return 1;
+			return 0;
 
 		case op_up:
 			PUSH(0);
