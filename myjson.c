@@ -202,3 +202,25 @@ int myjson_get_integer( const char* json, const struct myjson_token* token )
 
 	return result;
 }
+
+long long myjson_get_integer64( const char* json, const struct myjson_token* token )
+{
+	long long result = 0;
+	const char* value = json + token->start;
+	const char* end = value + token->length;
+
+	if (*value == '-')
+		++value;
+
+	while (value < end)
+	{
+		result *= 10;
+		result += (*value) - '0';
+		++value;
+	}
+
+	if (json[token->start] == '-')
+		result = -result;
+
+	return result;
+}
