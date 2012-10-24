@@ -243,8 +243,7 @@ JsonKeyValue JsonObject::getObjectChild(int index) const
 	key->value = (*it).first;
 
 	JsonKeyValue kv;
-	kv.key.impl = key;
-	kv.key.shouldDelete = true;
+	kv.key.assign((*it).first.str, (*it).first.len);
 	kv.value.impl = &(*it).second;
 	kv.value.shouldDelete = false;
 	return kv;

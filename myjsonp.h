@@ -43,7 +43,7 @@ private:
 
 struct JsonKeyValue
 {
-	JsonObject key;
+	std::string key;
 	JsonObject value;
 };
 
