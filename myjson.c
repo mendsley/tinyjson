@@ -81,9 +81,9 @@ void myjson_init()
 	st_escape['t'] = st_escape['u'] = op_unescape;
 }
 
-#define CHECK() if (current == out_end) { return max_tokens; }
+#define CHECK() if (out) { if (current == out_end) { return max_tokens; } } else { current = dummy; }
 #define PUSH(i) CHECK(); if (depth == 1) current->start = (uint16_t)(((cur+i) - (const unsigned char*)json))
-#define CAP(i) CHECK(); if (depth == 1) (current++)->length = (uint16_t)((cur+i) - ((const unsigned char*)json + current->start) + 1)
+#define CAP(i) CHECK(); if (depth == 1) (ntokens++),(current++)->length = (uint16_t)((cur+i) - ((const unsigned char*)json + current->start) + 1)
 
 int myjson_parse( const char* json, int length, struct myjson_token *out, int max_tokens )
 {
@@ -93,7 +93,9 @@ int myjson_parse( const char* json, int length, struct myjson_token *out, int ma
 	uint8_t (*st)[256] = &st_struct;
 	int utf8_remain = 0;
 	int depth = 0;
+	struct myjson_token dummy[2];
 	struct myjson_token* current = out;
+	int ntokens = 0;
 
 	end = (unsigned char*)json+length;
 	for (cur = (unsigned char*)json; cur < end; ++cur)
@@ -178,7 +180,7 @@ int myjson_parse( const char* json, int length, struct myjson_token *out, int ma
 		}
 	}
 
-	return (int)(current - out);
+	return (int)ntokens;
 }
 
 int myjson_get_integer( const char* json, const struct myjson_token* token )
