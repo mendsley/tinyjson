@@ -87,6 +87,14 @@ void myjson_init()
 
 int myjson_parse( const char* json, int length, struct myjson_token *out, int max_tokens )
 {
+	int err = myjson_parse_err(json, length, out, max_tokens);
+	if (err == -1)
+		err = 0;
+	return err;
+}
+
+int myjson_parse_err( const char* json, int length, struct myjson_token *out, int max_tokens )
+{
 	const unsigned char* cur;
 	const unsigned char* end;
 	struct myjson_token* out_end  = out + max_tokens;
@@ -104,7 +112,7 @@ int myjson_parse( const char* json, int length, struct myjson_token *out, int ma
 		switch (opcode)
 		{
 		case op_bad:
-			return 0;
+			return -1;
 
 		case op_up:
 			PUSH(0);

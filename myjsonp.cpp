@@ -86,9 +86,11 @@ static bool parseImpl(const char* json, int length, myjson_token_type type, Impl
 		return true;
 	}
 
-	int ntokens = myjson_parse(json, length, 0, 0);
-	if (!ntokens)
+	int ntokens = myjson_parse_err(json, length, 0, 0);
+	if (ntokens == -1)
 		return false;
+	if (ntokens == 0)
+		return true;
 
 	std::vector<myjson_token> tokens(ntokens);
 	myjson_parse(json, length, &tokens[0], ntokens);
