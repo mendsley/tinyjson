@@ -82,8 +82,8 @@ void myjson_init()
 }
 
 #define CHECK() if (out) { if (current == out_end) { return max_tokens; } } else { current = dummy; }
-#define PUSH(i) CHECK(); if (depth == 1) current->start = (uint16_t)(((cur+i) - (const unsigned char*)json))
-#define CAP(i) CHECK(); if (depth == 1) (ntokens++),(current++)->length = (uint16_t)((cur+i) - ((const unsigned char*)json + current->start) + 1)
+#define PUSH(i) CHECK(); if (depth == 1) current->start = (uint32_t)(((cur+i) - (const unsigned char*)json))
+#define CAP(i) CHECK(); if (depth == 1) (ntokens++),(current++)->length = (uint32_t)((cur+i) - ((const unsigned char*)json + current->start) + 1)
 
 int myjson_parse( const char* json, int length, struct myjson_token *out, int max_tokens )
 {

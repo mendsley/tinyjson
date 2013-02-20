@@ -26,8 +26,8 @@ enum myjson_token_type
 struct myjson_token
 {
 	enum myjson_token_type type;
-	uint16_t start;
-	uint16_t length;
+	uint32_t start;
+	uint32_t length;
 };
 
 void myjson_init();
