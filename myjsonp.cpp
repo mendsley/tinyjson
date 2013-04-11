@@ -233,7 +233,7 @@ JsonObject JsonObject::getChild(int index) const
 
 JsonKeyValue JsonObject::getObjectChild(int index) const
 {
-	if (!isArray() || index < 0 || index >= (int)impl->objChildren.size())
+	if (isArray() || index < 0 || index >= (int)impl->objChildren.size())
 		return JsonKeyValue();
 
 	Impl::map::const_iterator it = impl->objChildren.begin();
