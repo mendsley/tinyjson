@@ -30,6 +30,7 @@ public:
 	bool asBool() const;
 	int asInt() const;
 	long long asInt64() const;
+	float asFloat() const;
 
 	int numChildren() const;
 	JsonObject getChild(const char* key) const;

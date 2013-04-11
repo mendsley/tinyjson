@@ -195,6 +195,17 @@ long long JsonObject::asInt64() const
 	return myjson_get_integer64(impl->value.str, &token);
 }
 
+float JsonObject::asFloat() const
+{
+	if (!impl || !impl->type == MYJSON_TOKEN_LITERAL)
+		return 0;
+
+	myjson_token token;
+	token.start = 0;
+	token.length = impl->value.len;
+	return myjson_get_float(impl->value.str, &token);
+}
+
 int JsonObject::numChildren() const
 {
 	if (isArray())

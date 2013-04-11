@@ -35,6 +35,7 @@ int myjson_parse( const char* json, int length, struct myjson_token *out, int ma
 int myjson_parse_err( const char* json, int length, struct myjson_token *out, int max_tokens );
 int myjson_get_integer( const char* json, const struct myjson_token* token );
 long long myjson_get_integer64( const char* json, const struct myjson_token* token );
+float myjson_get_float( const char* json, const struct myjson_token* token );
 
 #ifdef __cplusplus
 }

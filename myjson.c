@@ -7,6 +7,7 @@
  */
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "myjson.h"
@@ -232,5 +233,19 @@ long long myjson_get_integer64( const char* json, const struct myjson_token* tok
 	if (json[token->start] == '-')
 		result = -result;
 
+	return result;
+}
+
+float myjson_get_float( const char* json, const struct myjson_token* token )
+{
+	float result = 0.0f;
+	const char* value = json + token->start;
+	const char* end = value + token->length;
+
+	char ch_end = *end;
+	char* endTag = (char*)end;
+	endTag[0] = 0;
+	result = (float) atof(value);
+	endTag[0] = ch_end;
 	return result;
 }
