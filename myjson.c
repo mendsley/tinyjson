@@ -109,7 +109,7 @@ int myjson_parse_err( const char* json, int length, struct myjson_token *out, in
 	end = (unsigned char*)json+length;
 	for (cur = (unsigned char*)json; cur < end; ++cur)
 	{
-		const enum opcode opcode = (*st)[*cur];
+		const enum opcode opcode = (enum opcode)(*st)[*cur];
 		switch (opcode)
 		{
 		case op_bad:
