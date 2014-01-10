@@ -27,6 +27,7 @@ public:
 	bool isArray() const;
 
 	std::string asString() const;
+	void asCStr(const char** str, int* length) const;
 	bool asBool() const;
 	int asInt() const;
 	long long asInt64() const;

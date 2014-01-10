@@ -165,6 +165,20 @@ std::string JsonObject::asString() const
 	return std::string(impl->value.str, impl->value.len);
 }
 
+void JsonObject::asCStr(const char** str, int* length) const
+{
+	if (!impl || !impl->type == MYJSON_TOKEN_STRING)
+	{
+		*str = 0;
+		*length = 0;
+	}
+	else
+	{
+		*str = impl->value.str;
+		*length = impl->value.len;
+	}
+}
+
 bool JsonObject::asBool() const
 {
 	if (!impl || !impl->type == MYJSON_TOKEN_LITERAL || impl->value.len < 1)
