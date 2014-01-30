@@ -1,0 +1,233 @@
+/**
+ * Copyright 2011 Matthew Endsley. All rights reserved.
+ * License: http://www.opensource.org/licenses/BSD-2-Clause
+ *
+ * Based on js0n implementation at:
+ * https://github.com/quartzjer/js0n/blob/master/js0n.c
+ */
+
+#include "tinyjson.h"
+
+#include <stdlib.h>
+#include <string.h>
+
+enum opcode {
+	op_loop,
+	op_bad,
+	op_up,
+	op_down,
+	op_quote_up,
+	op_quote_down,
+	op_escape,
+	op_unescape,
+	op_bare,
+	op_unbare,
+	op_utf8_2,
+	op_utf8_3,
+	op_utf8_4,
+	op_utf8_continue,
+};
+
+typedef unsigned char state[256];
+
+static state st_struct;
+static state st_bare;
+static state st_string;
+static state st_utf8cont;
+static state st_escape;
+
+void tinyjson_init() {
+	int ii;
+
+	memset(st_struct, op_bad, sizeof(st_struct));
+	memset(st_bare, op_bad, sizeof(st_bare));
+	memset(st_string, op_bad, sizeof(st_string));
+	memset(st_utf8cont, op_bad, sizeof(st_utf8cont));
+	memset(st_escape, op_bad, sizeof(st_escape));
+
+	st_struct['\t'] = st_struct[' '] = st_struct['\r'] = st_struct['\n'] = op_loop;
+	st_struct[':'] = st_struct[','] = op_loop;
+	st_struct['"'] = op_quote_up;
+	st_struct['['] = st_struct['{'] = op_up;
+	st_struct[']'] = st_struct['}'] = op_down;
+	st_struct['-'] = op_bare;
+	for (ii = '0'; ii <= '9'; ++ii) // 0-9
+		st_struct[ii] = op_bare;
+	st_struct['t'] = st_struct['f'] = st_struct['n'] = op_bare; // true, false, null
+
+	for (ii = 32; ii <= 126; ++ii) // could be more pendantic/validation checking
+		st_bare[ii] = op_loop;
+	st_bare['\t'] = st_bare[' '] = st_bare['\r'] = st_bare['\n'] = op_unbare;
+	st_bare[','] = st_bare[']'] = st_bare['}'] = op_unbare;
+
+	for (ii = 32; ii <= 126; ++ii)
+		st_string[ii] = op_loop;
+	st_string['\\'] = op_escape;
+	st_string['"'] = op_quote_down;
+	for (ii = 192; ii <= 223; ++ii)
+		st_string[ii] = op_utf8_2;
+	for (ii = 224; ii <= 239; ++ii)
+		st_string[ii] = op_utf8_3;
+	for (ii = 240; ii <= 247; ++ii)
+		st_string[ii] = op_utf8_4;
+
+	for (ii = 128; ii <= 191; ++ii)
+		st_utf8cont[ii] = op_utf8_continue;
+
+	st_escape['"'] = st_escape['\\'] = st_escape['b'] = op_unescape;
+	st_escape['f'] = st_escape['n'] = st_escape['r'] = op_unescape;
+	st_escape['t'] = st_escape['u'] = op_unescape;
+}
+
+#define CHECK() if (out) { if (current == out_end) { return max_tokens; } } else { current = dummy; }
+#define PUSH(i) CHECK(); if (depth == 1) current->start = (unsigned int)(((cur+i) - (const unsigned char*)json))
+#define CAP(i) CHECK(); if (depth == 1) (ntokens++),(current++)->length = (unsigned int)((cur+i) - ((const unsigned char*)json + current->start) + 1)
+
+int tinyjson_parse(const char* json, int length, struct tinyjson_token *out, int max_tokens) {
+	int err = tinyjson_parse_err(json, length, out, max_tokens);
+	if (err == -1)
+		err = 0;
+	return err;
+}
+
+int tinyjson_parse_err(const char* json, int length, struct tinyjson_token *out, int max_tokens) {
+	const unsigned char* cur;
+	const unsigned char* end;
+	struct tinyjson_token* out_end  = out + max_tokens;
+	unsigned char (*st)[256] = &st_struct;
+	int utf8_remain = 0;
+	int depth = 0;
+	struct tinyjson_token dummy[2];
+	struct tinyjson_token* current = out;
+	int ntokens = 0;
+
+	end = (unsigned char*)json+length;
+	for (cur = (unsigned char*)json; cur < end; ++cur) {
+		const enum opcode opcode = (enum opcode)(*st)[*cur];
+		switch (opcode) {
+		case op_bad:
+			return -1;
+
+		case op_up:
+			PUSH(0);
+			if (depth == 1)
+				current->type = (*cur) == '[' ? MYJSON_TOKEN_ARRAY : MYJSON_TOKEN_OBJECT;
+			++depth;
+			break;
+
+		case op_down:
+			--depth;
+			CAP(0);
+			break;
+
+		case op_quote_up:
+			PUSH(1);
+			if (depth == 1)
+				current->type = MYJSON_TOKEN_STRING;
+			st = &st_string;
+			break;
+
+		case op_quote_down:
+			st = &st_struct;
+			CAP(-1);
+			break;
+
+		case op_escape:
+			st = &st_escape;
+			break;
+
+		case op_unescape:
+			st = &st_string;
+			break;
+
+		case op_bare:
+			PUSH(0);
+			if (depth == 1)
+				current->type = MYJSON_TOKEN_LITERAL;
+			st = &st_bare;
+			break;
+
+		case op_unbare:
+			CAP(-1);
+			--cur;
+			st = &st_struct;
+			break;
+
+		case op_utf8_2:
+			utf8_remain = 1;
+			st = &st_utf8cont;
+			break;
+
+		case op_utf8_3:
+			utf8_remain = 2;
+			break;
+
+		case op_utf8_4:
+			utf8_remain = 3;
+			break;
+
+		case op_utf8_continue:
+			if (--utf8_remain == 0)
+				st = &st_struct;
+			break;
+
+		case op_loop:
+			break;
+		}
+	}
+
+	return tokens;
+}
+
+int tinyjson_get_integer(const char* json, const struct tinyjson_token* token) {
+	int result = 0;
+	const char* value = json + token->start;
+	const char* end = value + token->length;
+
+	if (*value == '-')
+		++value;
+
+	while (value < end) {
+		result *= 10;
+		result += (*value) - '0';
+		++value;
+	}
+
+	if (json[token->start] == '-')
+		result = -result;
+
+	return result;
+}
+
+long long tinyjson_get_integer64(const char* json, const struct tinyjson_token* token) {
+	long long result = 0;
+	const char* value = json + token->start;
+	const char* end = value + token->length;
+
+	if (*value == '-')
+		++value;
+
+	while (value < end) {
+		result *= 10;
+		result += (*value) - '0';
+		++value;
+	}
+
+	if (json[token->start] == '-')
+		result = -result;
+
+	return result;
+}
+
+float tinyjson_get_float(const char* json, const struct tinyjson_token* token) {
+	float result = 0.0f;
+	const char* value = json + token->start;
+	const char* end = value + token->length;
+
+	char ch_end = *end;
+	char* endTag = (char*)end;
+	endTag[0] = 0;
+	result = (float) atof(value);
+	endTag[0] = ch_end;
+	return result;
+}
