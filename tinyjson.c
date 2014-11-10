@@ -176,7 +176,7 @@ int tinyjson_parse_err(const char* json, int length, struct tinyjson_token *out,
 		}
 	}
 
-	return tokens;
+	return ntokens;
 }
 
 int tinyjson_get_integer(const char* json, const struct tinyjson_token* token) {
