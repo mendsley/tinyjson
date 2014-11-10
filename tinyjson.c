@@ -36,6 +36,9 @@ static state st_string;
 static state st_utf8cont;
 static state st_escape;
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void tinyjson_init() {
 	int ii;
 
@@ -83,6 +86,9 @@ void tinyjson_init() {
 #define PUSH(i) CHECK(); if (depth == 1) current->start = (unsigned int)(((cur+i) - (const unsigned char*)json))
 #define CAP(i) CHECK(); if (depth == 1) (ntokens++),(current++)->length = (unsigned int)((cur+i) - ((const unsigned char*)json + current->start) + 1)
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int tinyjson_parse(const char* json, int length, struct tinyjson_token *out, int max_tokens) {
 	int err = tinyjson_parse_err(json, length, out, max_tokens);
 	if (err == -1)
@@ -90,6 +96,9 @@ int tinyjson_parse(const char* json, int length, struct tinyjson_token *out, int
 	return err;
 }
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int tinyjson_parse_err(const char* json, int length, struct tinyjson_token *out, int max_tokens) {
 	const unsigned char* cur;
 	const unsigned char* end;
@@ -179,6 +188,9 @@ int tinyjson_parse_err(const char* json, int length, struct tinyjson_token *out,
 	return ntokens;
 }
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int tinyjson_get_integer(const char* json, const struct tinyjson_token* token) {
 	int result = 0;
 	const char* value = json + token->start;
@@ -199,6 +211,9 @@ int tinyjson_get_integer(const char* json, const struct tinyjson_token* token) {
 	return result;
 }
 
+#ifdef __cplusplus
+extern "C"
+#endif
 long long tinyjson_get_integer64(const char* json, const struct tinyjson_token* token) {
 	long long result = 0;
 	const char* value = json + token->start;
@@ -219,6 +234,9 @@ long long tinyjson_get_integer64(const char* json, const struct tinyjson_token* 
 	return result;
 }
 
+#ifdef __cplusplus
+extern "C"
+#endif
 float tinyjson_get_float(const char* json, const struct tinyjson_token* token) {
 	float result = 0.0f;
 	const char* value = json + token->start;
