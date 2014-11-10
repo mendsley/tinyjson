@@ -49,7 +49,7 @@ static bool parseObject(const char* json, const tinyjson_token* tokens, int ntok
 		if (tokens[ii].type != MYJSON_TOKEN_STRING)
 			return false;
 
-		const InternalString key = {json + tokens[ii].start, tokens[ii].length};
+		const InternalString key = {json + tokens[ii].start, (int)tokens[ii].length};
 		Impl& child = impl->objChildren[key];
 		if (!parseImpl(json + tokens[ii + 1].start, tokens[ii + 1].length, tokens[ii + 1].type, &child))
 			return false;
