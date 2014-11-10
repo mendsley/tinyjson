@@ -237,10 +237,6 @@ JsonKeyValue JsonObject::getObjectChild(int index) const {
 	for (int ii = 0; ii < index; ++ii)
 		++it;
 
-	Impl* key = new Impl;
-	key->type = MYJSON_TOKEN_STRING;
-	key->value = (*it).first;
-
 	JsonKeyValue kv;
 	kv.key.assign((*it).first.str, (*it).first.len);
 	kv.value.impl = &(*it).second;
