@@ -91,6 +91,10 @@ static bool parseImpl(const char* json, int length, tinyjson_token_type type, Im
 
 	case MYJSON_TOKEN_ARRAY:
 		return parseArray(json, &tokens[0], ntokens, impl);
+
+	case MYJSON_TOKEN_STRING:
+	case MYJSON_TOKEN_LITERAL:
+		break;
 	}
 
 	return false;
@@ -139,14 +143,14 @@ bool JsonObject::isArray() const {
 }
 
 std::string JsonObject::asString() const {
-	if (!impl || !impl->type == MYJSON_TOKEN_STRING)
+	if (!impl || impl->type != MYJSON_TOKEN_STRING)
 		return std::string();
 
 	return std::string(impl->value.str, impl->value.len);
 }
 
 void JsonObject::asCStr(const char** str, int* length) const {
-	if (!impl || !impl->type == MYJSON_TOKEN_STRING) {
+	if (!impl || impl->type != MYJSON_TOKEN_STRING) {
 		*str = 0;
 		*length = 0;
 	} else {
@@ -156,14 +160,14 @@ void JsonObject::asCStr(const char** str, int* length) const {
 }
 
 bool JsonObject::asBool() const {
-	if (!impl || !impl->type == MYJSON_TOKEN_LITERAL || impl->value.len < 1)
+	if (!impl || impl->type != MYJSON_TOKEN_LITERAL || impl->value.len < 1)
 		return false;
 
 	return impl->value.str[0] == 't';
 }
 
 int JsonObject::asInt() const {
-	if (!impl || !impl->type == MYJSON_TOKEN_LITERAL)
+	if (!impl || impl->type != MYJSON_TOKEN_LITERAL)
 		return 0;
 
 	tinyjson_token token;
@@ -173,7 +177,7 @@ int JsonObject::asInt() const {
 }
 
 long long JsonObject::asInt64() const {
-	if (!impl || !impl->type == MYJSON_TOKEN_LITERAL)
+	if (!impl || impl->type != MYJSON_TOKEN_LITERAL)
 		return 0;
 
 	tinyjson_token token;
@@ -183,7 +187,7 @@ long long JsonObject::asInt64() const {
 }
 
 float JsonObject::asFloat() const {
-	if (!impl || !impl->type == MYJSON_TOKEN_LITERAL)
+	if (!impl || impl->type != MYJSON_TOKEN_LITERAL)
 		return 0;
 
 	tinyjson_token token;
