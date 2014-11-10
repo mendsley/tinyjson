@@ -84,7 +84,7 @@ void tinyjson_init() {
 
 #define CHECK() if (out) { if (current == out_end) { return max_tokens; } } else { current = dummy; }
 #define PUSH(i) CHECK(); if (depth == 1) current->start = (unsigned int)(((cur+i) - (const unsigned char*)json))
-#define CAP(i) CHECK(); if (depth == 1) (ntokens++),(current++)->length = (unsigned int)((cur+i) - ((const unsigned char*)json + current->start) + 1)
+#define CAP(i) CHECK(); if (depth == 1) (ntokens++),(current)->length = (unsigned int)((cur+i) - ((const unsigned char*)json + current->start) + 1),(++current)
 
 #ifdef __cplusplus
 extern "C"
